@@ -1,0 +1,91 @@
+<link rel="import" href="../polymer/polymer.html">
+<script src="../s-promisejs/promise.min.js"></script>
+<script src="./texlive.js/pdftex.js"></script>
+
+<!--
+`texlive-element`
+WebComponent for compiling latex using texlive
+
+@demo demo/index.html 
+-->
+
+<dom-module id="texlive-element">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+    </style>
+    <textarea>\documentclass[12pt]{article}
+\usepackage{amsmath}
+\usepackage{graphicx}
+
+\title{\TeX live.js}
+\author{Created by Manuel Sch\"olling}
+\date{\today}
+\begin{document}
+  \maketitle
+  \TeX{}live.js is a compiler for the \TeX{}
+  typesetting program created using Mozilla's Emscripten
+  Compiler. It offers programmable desktop
+  publishing features and extensive facilities for
+  automating most aspects of typesetting and desktop
+  publishing, including numbering and cross-referencing,
+  tables and figures, page layout, bibliographies, and
+  much more. It supports \LaTeX{} which was originally written 
+  in 1984 by Leslie Lamport and has become the dominant method for
+  using \TeX;
+
+  % This is a comment, not shown in final output.
+  % The following shows typesetting power of LaTeX:
+  \begin{align}
+    E_0 &= mc^2                              \\
+    E &= \frac{mc^2}{\sqrt{1-\frac{v^2}{c^2}}}
+  \end{align}
+
+
+  \TeX{}live.js even supports images! This photo was taken by Laura Poitras/Praxis Films
+
+  \includegraphics[height=5cm, keepaspectratio]{snowden}
+\end{document}</textarea>
+  </template>
+
+  <script>
+    Polymer({
+
+      is: 'texlive-element',
+      ready: function () {
+        this.source = this.querySelector('textarea').value
+      },
+      properties: {
+        source: {
+          type: String,
+          observer: '_observeSource'
+        },
+        pdf: {
+          type: String,
+          notify: true
+        },
+        workerPath: {
+          type: String,
+          value: '../../texlive-element/texlive.js/pdftex-worker.js'
+        }
+      },
+      _observeSource: function (source) {
+        var pdftex = new PDFTeX(this.workerPath)
+        var self = this
+        function appendOutput (log) {
+          console.info('texlive.js', log)
+        }
+        pdftex.set_TOTAL_MEMORY(80*1024*1024).then(function() {
+          pdftex.on_stdout = appendOutput;
+          pdftex.on_stderr = appendOutput;
+
+          pdftex.compile(source).then(function(pdfUrl) {
+            self.pdf = pdfUrl
+          })
+        })
+      }
+    });
+  </script>
+</dom-module>
