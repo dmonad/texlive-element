@@ -4,12 +4,14 @@
   "main": "texlive-element.html",
   "dependencies": {
     "polymer": "Polymer/polymer#^1.4.0",
-    "s-promisejs": "*"
+    "s-promisejs": "*",
+    "texlive.js": "https://github.com/manuels/texlive.js.git#56e790f4642f1c817f29f08ce6efc3eec5a35dff"
   },
   "devDependencies": {
     "iron-component-page": "PolymerElements/iron-component-page#^1.0.0",
     "iron-demo-helpers": "PolymerElements/iron-demo-helpers#^1.0.0",
     "web-component-tester": "^4.0.0",
-    "webcomponentsjs": "webcomponents/webcomponentsjs#^0.7.0"
+    "webcomponentsjs": "webcomponents/webcomponentsjs#^0.7.0",
+    "ace-element": "^0.3.1"
   }
 }
