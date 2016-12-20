@@ -2,6 +2,10 @@
   "name": "texlive-element",
   "description": "WebComponent for compiling latex using texlive",
   "main": "texlive-element.html",
+  "keywords": [
+    "web-components"
+  ],
+  "license": "MIT",
   "dependencies": {
     "polymer": "Polymer/polymer#^1.4.0",
     "s-promisejs": "*",

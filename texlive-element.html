@@ -81,6 +81,7 @@ WebComponent for compiling latex using texlive
       _observeSource: function () {
         if (!this.running) {
           var source = this.source
+          this.fire('start', source)
           this.running = true
           this.error = false
           this.log = ''
@@ -117,6 +118,24 @@ WebComponent for compiling latex using texlive
           })
         }
       }
+      /**
+       * Fired when compilation successfully terminated.
+       *
+       * @event complete
+       * @param {String} pdfUrl Url to pdf
+       */
+      /**
+       * Fired when compilation successfully terminated.
+       *
+       * @event error
+       * @param {String} message Error message
+       */
+      /**
+       * Fired when compilation started.
+       *
+       * @event start
+       * @param {String} source Compilation source
+       */
     })
   </script>
 </dom-module>
