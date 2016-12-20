@@ -17,8 +17,12 @@
     </style>
   </head>
   <body>
-    <template is="dom-bind">
-      <ace-element style="height: 500px" mode="latex">\documentclass[12pt]{article}
+    <div class="" style="max-width: 700px; margin-left: auto; margin-right: auto;">
+      <h3>Basic texlive-element Demo</h3>
+      <demo-snippet>
+<template is="dom-bind">
+  <ace-element style="height: 500px" mode="latex">
+\documentclass[12pt]{article}
 \usepackage{amsmath}
 \usepackage{graphicx}
 
@@ -50,25 +54,18 @@
 
   \includegraphics[height=5cm, keepaspectratio]{snowden}
 \end{document}
-      </ace-element>
-      <texlive-element source="{{source}}" pdf="{{pdf}}"></texlive-element>
-      <button onclick="compile()">Compile!</button>
-      <pdfjs-element src="{{pdf}}" style="min-height: 900px;"></pdfjs-element>
-      <script>
-        function compile () {
-          var source = document.querySelector('ace-element').ace.getValue()
-          document.querySelector('texlive-element').source = source
-        }
-      </script
-    </template>
-    <!--div class="vertical-section-container centered">
-      <h3>Basic texlive-element Demo</h3>
-      <demo-snippet>
-        <template is="dom-bind">
-          <pdf-element src="{{pdf}}"></pdf-element>
-          <texlive-element worker-path="../../texlive-element/texlive.js/pdftex-worker.js" pdf="{{pdf}}"></texlive-element>
-        </template>
+  </ace-element>
+  <texlive-element debug source="{{source}}" pdf="{{pdf}}"></texlive-element>
+  <button onclick="compile()">Compile!</button>
+  <pdfjs-element src="{{pdf}}" style="height: 300px;" log="{{log}}"></pdfjs-element>
+  <script>
+    function compile () {
+      var source = document.querySelector('ace-element').ace.getValue()
+      document.querySelector('texlive-element').source = source
+    }
+  </script>
+</template>
       </demo-snippet>
-    </div-->
+    </div>
   </body>
 </html>

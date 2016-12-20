@@ -13,46 +13,110 @@ WebComponent for compiling latex using texlive
   <template>
     <style>
       :host {
-        display: block;
+        display: none;
       }
     </style>
   </template>
 
   <script>
     Polymer({
-
       is: 'texlive-element',
       ready: function () {
       },
       properties: {
+        /**
+         * LaTeX source
+         */
         source: {
           type: String,
           observer: '_observeSource'
         },
+        /**
+         * Url to pdf file. This is actually a binary file encoded in a url
+         */
         pdf: {
           type: String,
           notify: true
         },
-        workerPath: {
+        /**
+         * Path to pdftex-worker
+         */
+        pdftexWorkerPath: {
           type: String,
           value: '../../texlive.js/pdftex-worker.js'
+        },
+        /**
+         * Texlive log output
+         */
+        log: {
+          type: String,
+          value: '',
+          notify: true
+        },
+        /**
+         * Whether this element is still processing a request
+         */
+        running: {
+          type: Boolean,
+          value: false,
+          notify: true
+        },
+        /**
+         * An error occurred and completed the compilation
+         */
+        error: {
+          type: Boolean,
+          value: false,
+          notify: true
+        },
+        /**
+         * Log to console
+         */
+        debug: {
+          type: Boolean,
+          value: false,
+          notify: true
         }
       },
-      _observeSource: function (source) {
-        var pdftex = new PDFTeX(this.workerPath)
-        var self = this
-        function appendOutput (log) {
-          console.info('texlive.js', log)
-        }
-        pdftex.set_TOTAL_MEMORY(80*1024*1024).then(function() {
-          pdftex.on_stdout = appendOutput;
-          pdftex.on_stderr = appendOutput;
+      _observeSource: function () {
+        if (!this.running) {
+          var source = this.source
+          this.running = true
+          this.error = false
+          this.log = ''
+          var pdftex = new PDFTeX(this.pdftexWorkerPath)
+          var self = this
+          var processNext = function processNext () {
+            if (self.source !== source) {
+              self._observeSource
+            }
+          }
+          pdftex.set_TOTAL_MEMORY(80*1024*1024).then(function () {
+            var logOutput = function logOutput (log) {
+              if (self.debug) {
+                console.log(log)
+              }
+              self.log += log + '\n'
+              if (log.indexOf('Emergency stop') < 0) {
+                // an error occured
+                self.error = true
+                self.running = false
+                self.fire('error', 'Emergency stop!')
+                processNext()
+              }
+            }
+            pdftex.on_stdout = logOutput
+            pdftex.on_stderr = logOutput
 
-          pdftex.compile(source).then(function(pdfUrl) {
-            self.pdf = pdfUrl
+            pdftex.compile(source).then(function(pdfUrl) {
+              self.pdf = pdfUrl
+              self.running = false
+              self.fire('complete', pdfUrl)
+              processNext()
+            })
           })
-        })
+        }
       }
-    });
+    })
   </script>
 </dom-module>
