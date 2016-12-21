@@ -79,7 +79,7 @@
         }
       },
       _observeSource: function () {
-        if (!this.running) {
+        if (!this.running && this.source != '') {
           var source = this.source
           this.fire('start', source)
           this.running = true
