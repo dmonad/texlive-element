@@ -18,7 +18,7 @@
   </head>
   <body>
     <div class="" style="max-width: 700px; margin-left: auto; margin-right: auto;">
-      <h3>Basic texlive-element Demo</h3>
+      <h3>Basic &lt;texlive-element&gt; Demo</h3>
       <demo-snippet>
 <template is="dom-bind">
   <ace-element style="height: 500px" mode="latex">
@@ -26,8 +26,8 @@
 \usepackage{amsmath}
 \usepackage{graphicx}
 
-\title{\TeX live.js}
-\author{Created by Manuel Sch\"olling}
+\title{$<$texlive-element$>$}
+\author{Compile TeX{} directly in your browser!}
 \date{\today}
 \begin{document}
   \maketitle
@@ -48,21 +48,21 @@
     E_0 &= mc^2                              \\
     E &= \frac{mc^2}{\sqrt{1-\frac{v^2}{c^2}}}
   \end{align}
-
-
-  \TeX{}live.js even supports images! This photo was taken by Laura Poitras/Praxis Films
-
-  \includegraphics[height=5cm, keepaspectratio]{snowden}
 \end{document}
   </ace-element>
   <texlive-element debug source="{{source}}" pdf="{{pdf}}"></texlive-element>
   <button onclick="compile()">Compile!</button>
-  <pdfjs-element src="{{pdf}}" style="height: 300px;" log="{{log}}"></pdfjs-element>
+  <pre id="logContainer"></pre>
+  <pdfjs-element src="{{pdf}}" log="{{log}}"></pdfjs-element>
   <script>
+    var texliveElement = document.querySelector('texlive-element')
     function compile () {
       var source = document.querySelector('ace-element').ace.getValue()
-      document.querySelector('texlive-element').source = source
+      texliveElement.source = source
     }
+    texliveElement.addEventListener('log', function log (event) {
+      document.querySelector('#logContainer').textContent += event.detail + '\n'
+    })
   </script>
 </template>
       </demo-snippet>

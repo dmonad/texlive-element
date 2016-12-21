@@ -9,7 +9,8 @@
   "dependencies": {
     "polymer": "Polymer/polymer#^1.4.0",
     "s-promisejs": "*",
-    "texlive.js": "https://github.com/manuels/texlive.js.git#56e790f4642f1c817f29f08ce6efc3eec5a35dff"
+    "texlive.js": "https://github.com/manuels/texlive.js.git#56e790f4642f1c817f29f08ce6efc3eec5a35dff",
+    "pdfjs-element": "^0.1.0"
   },
   "devDependencies": {
     "iron-component-page": "PolymerElements/iron-component-page#^1.0.0",

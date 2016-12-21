@@ -3,8 +3,8 @@
 <script src="../texlive.js/pdftex.js"></script>
 
 <!--
-`texlive-element`
-WebComponent for compiling latex using texlive
+# &lt;texlive-element&gt;  <iframe src="https://ghbtns.com/github-btn.html?user=dmonad&repo=texlive-element&type=star&count=true" frameborder="0" scrolling="0" width="170px" height="20px"></iframe>
+> Polymer WebComponent for compiling latex in your browser using [texlive.js](https://github.com/manuels/texlive.js)!
 
 @demo demo/index.html 
 -->
@@ -97,6 +97,7 @@ WebComponent for compiling latex using texlive
               if (self.debug) {
                 console.log(log)
               }
+              self.fire('log', log)
               self.log += log + '\n'
               if (log.indexOf('Emergency stop') < 0) {
                 // an error occured
@@ -123,6 +124,12 @@ WebComponent for compiling latex using texlive
        *
        * @event complete
        * @param {String} pdfUrl Url to pdf
+       */
+      /**
+       * Fired when pdftex logs a message (the complete log is available in the `log` property)
+       *
+       * @event log
+       * @param {String} pdfUrl The log message
        */
       /**
        * Fired when compilation successfully terminated.
