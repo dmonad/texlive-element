@@ -53,7 +53,7 @@
   <texlive-element source="{{source}}" pdf="{{pdf}}"></texlive-element>
   <button onclick="compile()">Compile!</button>
   <pre id="logContainer"></pre>
-  <pdfjs-element src="{{pdf}}" log="{{log}}"></pdfjs-element>
+  <pdfjs-element src="{{pdf}}" log="{{log}}" pdftex-worker-path="../../texlive.js/pdftex-worker.js"></pdfjs-element>
   <script>
     var texliveElement = document.querySelector('texlive-element')
     function compile () {
