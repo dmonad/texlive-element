@@ -99,7 +99,7 @@
               }
               self.fire('log', log)
               self.log += log + '\n'
-              if (log.indexOf('Emergency stop') < 0) {
+              if (log.indexOf('Emergency stop') >= 0) {
                 // an error occured
                 self.error = true
                 self.running = false

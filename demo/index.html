@@ -24,7 +24,6 @@
   <ace-element style="height: 500px" mode="latex">
 \documentclass[12pt]{article}
 \usepackage{amsmath}
-\usepackage{graphicx}
 
 \title{$<$texlive-element$>$}
 \author{Compile TeX{} directly in your browser!}
@@ -53,7 +52,7 @@
   <texlive-element source="{{source}}" pdf="{{pdf}}"></texlive-element>
   <button onclick="compile()">Compile!</button>
   <pre id="logContainer"></pre>
-  <pdfjs-element src="{{pdf}}" log="{{log}}" pdftex-worker-path="../../texlive.js/pdftex-worker.js"></pdfjs-element>
+  <pdfjs-element src="{{pdf}}" log="{{log}}"></pdfjs-element>
   <script>
     var texliveElement = document.querySelector('texlive-element')
     function compile () {
