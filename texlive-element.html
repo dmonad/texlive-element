@@ -1,12 +1,11 @@
 <link rel="import" href="../polymer/polymer.html">
-<script src="../s-promisejs/promise.min.js"></script>
-<script src="../texlive.js/pdftex.js"></script>
+<script src="../pdftex.js/pdftex.js"></script>
 
 <!--
 # &lt;texlive-element&gt;  <iframe src="https://ghbtns.com/github-btn.html?user=dmonad&repo=texlive-element&type=star&count=true" frameborder="0" scrolling="0" width="170px" height="20px"></iframe>
-> Polymer WebComponent for compiling latex in your browser using [texlive.js](https://github.com/manuels/texlive.js)!
+> Polymer WebComponent for compiling latex in your browser using [pdftex.js](https://github.com/dmonad/pdftex.js)!
 
-@demo demo/index.html 
+@demo demo.html
 -->
 
 <dom-module id="texlive-element">
@@ -39,11 +38,12 @@
           notify: true
         },
         /**
-         * Path to pdftex-worker
+         * Dir to pdftex.js. Used to locate pdftex-worker. This is set global!
          */
-        pdftexWorkerPath: {
+        pdftexDir: {
           type: String,
-          value: '/bower_components/texlive.js/pdftex-worker.js'
+          value: '/bower_components/pdftex.js/',
+          observer: '_observePdftexDir'
         },
         /**
          * Texlive log output
@@ -78,45 +78,39 @@
           notify: true
         }
       },
+      _observePdftexDir: function () {
+        pdftex.setPdftexDir(this.pdftexDir)
+      },
       _observeSource: function () {
-        if (!this.running && this.source != '') {
+        if (!this.running && this.source !== '') {
           var source = this.source
           this.fire('start', source)
           this.running = true
           this.error = false
           this.log = ''
-          var pdftex = new PDFTeX(this.pdftexWorkerPath)
           var self = this
           var processNext = function processNext () {
             if (self.source !== source) {
               self._observeSource
             }
           }
-          pdftex.set_TOTAL_MEMORY(80*1024*1024).then(function () {
-            var logOutput = function logOutput (log) {
-              if (self.debug) {
-                console.log(log)
-              }
-              self.fire('log', log)
-              self.log += log + '\n'
-              if (log.indexOf('Emergency stop') >= 0) {
-                // an error occured
-                self.error = true
-                self.running = false
-                self.fire('error', 'Emergency stop!')
-                processNext()
-              }
+          var compile = pdftex(source, { debug: self.debug })
+          compile.on('finish', function (event) {
+            self.running = false
+            if (event.success) {
+              self.pdf = event.url
+              self.fire('complete', event.url)
+            } else {
+              self.fire('error', event)
             }
-            pdftex.on_stdout = logOutput
-            pdftex.on_stderr = logOutput
-
-            pdftex.compile(source).then(function(pdfUrl) {
-              self.pdf = pdfUrl
-              self.running = false
-              self.fire('complete', pdfUrl)
-              processNext()
-            })
+            processNext()
           })
+          var log = function (message) {
+            self.fire('log', message)
+            self.log += log + '\n'
+          }
+          compile.on('log', log)
+          compile.on('err', log)
         }
       }
       /**

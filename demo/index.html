@@ -10,7 +10,7 @@
     <link rel="import" href="../../iron-demo-helpers/demo-snippet.html">
     <link rel="import" href="../../pdfjs-element/pdfjs-element.html">
     <link rel="import" href="../../ace-element/ace-element.html">
-    
+
     <link rel="import" href="../texlive-element.html">
 
     <style is="custom-style" include="demo-pages-shared-styles">
@@ -30,14 +30,14 @@
 \date{\today}
 \begin{document}
   \maketitle
-  \TeX{}live.js is a compiler for the \TeX{}
+  \textit{pdftex.js} is a compiler for the \TeX{}
   typesetting program created using Mozilla's Emscripten
   Compiler. It offers programmable desktop
   publishing features and extensive facilities for
   automating most aspects of typesetting and desktop
   publishing, including numbering and cross-referencing,
   tables and figures, page layout, bibliographies, and
-  much more. It supports \LaTeX{} which was originally written 
+  much more. It supports \LaTeX{} which was originally written
   in 1984 by Leslie Lamport and has become the dominant method for
   using \TeX;
 
@@ -49,11 +49,32 @@
   \end{align}
 \end{document}
   </ace-element>
-  <texlive-element source="{{source}}" pdf="{{pdf}}"></texlive-element>
+  <texlive-element source="{{source}}" pdf="{{pdf}}" pdftex-dir="../../pdftex.js/"></texlive-element>
   <button onclick="compile()">Compile!</button>
   <pre id="logContainer"></pre>
   <pdfjs-element src="{{pdf}}" log="{{log}}"></pdfjs-element>
   <script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker
+    .register(
+      '../service-worker.js', { scope: './' }
+    ).then(function (reg) {
+      // registration worked
+      console.log(
+        'Pdftex service worker registration succeeded. Scope is ' +
+        reg.scope
+      )
+      // Optionally you can preload the worker and the resources for a faster
+      // initial compilation. You should only do that if the service worker is
+      // activated
+      if (reg.active != null) {
+        pdftex.preload()
+      }
+    }).catch(function (error) {
+      // registration failed
+      console.log('Pdftex service worker registration failed with ' + error)
+    })
+  }
     var texliveElement = document.querySelector('texlive-element')
     function compile () {
       document.querySelector('#logContainer').textContent = ''
