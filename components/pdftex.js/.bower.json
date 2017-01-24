@@ -1,0 +1,14 @@
+{
+  "name": "pdftex.js",
+  "homepage": "https://github.com/dmonad/pdftex.js",
+  "version": "0.0.10",
+  "_release": "0.0.10",
+  "_resolution": {
+    "type": "version",
+    "tag": "v0.0.10",
+    "commit": "59e76cce4b55a52d2ab19191bf3aa36da15fc40a"
+  },
+  "_source": "https://github.com/dmonad/pdftex.js.git",
+  "_target": "^0.0.10",
+  "_originalSource": "pdftex.js"
+}

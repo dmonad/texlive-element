@@ -1,0 +1,249 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../iron-resizable-behavior/iron-resizable-behavior.html">
+
+<link rel="stylesheet" href="../pdfjs-dist/web/pdf_viewer.css">
+<script src="../pdfjs-dist/web/compatibility.js"></script>
+<script src="../pdfjs-dist/build/pdf.min.js"></script>
+<script src="../pdfjs-dist/web/pdf_viewer.js"></script>
+
+<style>
+  .page {
+    position: relative;
+    width: 100%;
+  }
+</style>
+
+<!--
+# &lt;pdfjs-element&gt;  <iframe src="https://ghbtns.com/github-btn.html?user=dmonad&repo=pdfjs-element&type=star&count=true" frameborder="0" scrolling="0" width="170px" height="20px"></iframe>
+> Polymer WebComponent for rendering PDF files - stylable
+
+| Custom CSS property | Description
+| ---------------- | -------------
+| `--pdfjs-page`        | Style individual page
+
+@demo demo/index.html
+-->
+
+<dom-module id="pdfjs-element">
+  <template>
+    <style>
+      :host {
+        display: block;
+        overflow: auto;
+        padding-bottom: 10px;
+      }
+      .page {
+        @apply(--pdfjs-page)
+      }
+    </style>
+    <div id="pdfContainer"></div>
+  </template>
+
+  <script>
+    Polymer({
+      ready: function () {
+        this.scopeSubtree(this.$.pdfContainer, true)
+
+        this.scaling = 1
+        this._max_scale = 1.25
+        this._scrollbar_padding = 40
+        this._pageRange = [[0, Number.MAX_SAFE_INTEGER]]
+        this._drawingFinished = true
+
+        this._isReady = true
+        this._pageChanged()
+        this._pageRangeChanged()
+        this._srcChanged()
+
+        var self = this
+        this.addEventListener('iron-resize', this._scaleDrawing.bind(this))
+        setInterval(function () {
+          if (self.scale != null && self.scale !== 1 && new Date() - self.lastScaleDrawing > 500 && !this.scaling) {
+            self._drawPdfDocument(true)
+          }
+        }, 1000)
+      },
+      is: 'pdfjs-element',
+      behaviors: [Polymer.IronResizableBehavior],
+      properties: {
+        /**
+         * Source url
+         */
+        src: {
+          type: String,
+          observer: '_srcChanged'
+        },
+        /**
+         * Path to pdfjs web worker
+         */
+        pdfjsWorkerPath: {
+          type: String,
+          observer: '_workerPathChanged',
+          value: '/bower_components/pdfjs-dist/build/pdf.worker.min.js'
+        },
+        /**
+         * Page range. E.g. "1", 1-2", or "3-4,6-7"
+         */
+        pageRange: {
+          type: String,
+          observer: '_pageRangeChanged',
+          notify: true
+        },
+        /**
+         * Page number. E.g. "1" for the first page
+         */
+        page: {
+          type: Number,
+          observer: '_pageChanged'
+        },
+        /**
+         * Number of pages for the current pdf file
+         */
+        numberOfPages: {
+          type: Number,
+          notify: true
+        }
+      },
+      _workerPathChanged: function () {
+        PDFJS.workerSrc = this.pdfjsWorkerPath
+      },
+      _pageChanged: function () {
+        if (this.page != null) {
+          this.pageRange = this.page + ''
+        }
+      },
+      _pageRangeChanged: function () {
+        try {
+          // pages is of the form [[1,1], [1,2], [3,4]]
+          var pages
+          if (this.pageRange == null || this.page === '') {
+            pages = [[0, Number.MAX_SAFE_INTEGER]]
+          } else {
+            // parse page to pages
+            pages = this.pageRange.split(',').map(function (p) {
+              var r = p.split('-')
+              if (r.length > 2 || r.length == 0) {
+                throw new Error('Invalid')
+              }
+              r = r.map(Number)
+              if (r.length === 1) {
+                r.push(r[0])
+              }
+              return r
+            })
+          }
+          this._pageRange = pages
+          this._drawPdfDocument()
+        } catch (e) {
+          // throw new Error('Invalid page range! Valid page ranges: "1", 1-2", and "3-4,6-7"')
+        }
+      },
+      _srcChanged: function () {
+        if (this.src == null || this._isReady !== true) {
+          return
+        }
+        var self = this
+        PDFJS.getDocument(this.src).then(function(pdfDocument) {
+          self._pdfDocument = pdfDocument
+          self._drawPdfDocument()
+        })
+      },
+      _scaleDrawingForced: function (_pdfUpscaleSize) {
+        if (this._isReady !== true) {
+          return
+        }
+        this.lastScaleDrawing = new Date()
+        _pdfUpscaleSize = typeof _pdfUpscaleSize === 'number' ? _pdfUpscaleSize : this._pdfUpscaleSize
+        if (_pdfUpscaleSize == null)
+          return
+        var propScroll = this.scrollTop / this.scale || 0
+        this.scale = (this.getBoundingClientRect().width - this._scrollbar_padding) / _pdfUpscaleSize
+        this.$.pdfContainer.setAttribute('style', `transform-origin: 0 0; transform: scale(${ this.scale });`)
+        this.scrollTop = propScroll * this.scale
+      },
+      _scaleDrawing: function (_pdfUpscaleSize) {
+        if (this._isReady !== true) {
+          return
+        }
+        if (this._scaling !== true) {
+          this._scaling = true
+          
+          var self = this
+          window.requestAnimationFrame(function () {
+            self._scaling = false
+            self._scaleDrawingForced(_pdfUpscaleSize)
+          })
+        }
+      },
+      _drawPdfPage: function (i, _pdfUpscaleSize) {
+        if (this._isReady !== true) {
+          return
+        }
+        const CSS_UNITS = 96.0 / 72.0 // needed to scale pdfjs. check https://github.com/mozilla/pdf.js/blob/7d8fa1385d47e180cdba32a2e63d87d5c4132d7f/web/ui_utils.js
+        var self = this
+        var div = document.createElement('div')
+        if (this._pageRange.some(function (range) {
+          return range[0] <= i && i <= range[1]
+        })) {
+          return this._pdfDocument.getPage(i).then(function (pdfPage) {
+            var scale = _pdfUpscaleSize / (pdfPage.view[2] * CSS_UNITS)
+            var viewport = pdfPage.getViewport(scale)
+            var pdfPageView = new PDFJS.PDFPageView({
+              container: div,
+              id: i,
+              scale: scale,
+              defaultViewport: viewport,
+              textLayerFactory: new PDFJS.DefaultTextLayerFactory(),
+              annotationLayerFactory: new PDFJS.DefaultAnnotationLayerFactory()
+            })
+            pdfPageView.setPdfPage(pdfPage)
+            return pdfPageView.draw()
+          }).then(function () {
+            return Promise.resolve(div)
+          }) 
+        } else {
+          div.style.display = 'none'
+          return Promise.resolve(div)
+        }
+      },
+      _drawPdfDocument: function (keepScrollPosition) {
+        if (this._isReady !== true || this._pdfDocument == null) {
+          return
+        }
+        var scrollPosition
+        if (this.keepScrollPosition || keepScrollPosition) {
+          scrollPosition = this.scrollTop
+        } else {
+          scrollPosition = 0
+        }
+        var _pdfUpscaleSize = this.getBoundingClientRect().width - this._scrollbar_padding
+        var self = this
+        this.numberOfPages = this._pdfDocument.numPages
+        var _container = this.$.pdfContainer
+        while (_container.children.length > this.numberOfPages) {
+          _container.removeChild(_container.lastChild);
+        }
+        while (_container.children.length < this.numberOfPages) {
+          this.$.pdfContainer.append(document.createElement('div'))
+        }
+        
+        var promises = []
+        for (var i = 1; i <= this.numberOfPages; i++) {
+          promises.push(this._drawPdfPage(i, _pdfUpscaleSize))
+        }
+        Promise.all(promises).then(function (divs) {
+          while(_container.lastChild != null) {
+            _container.removeChild(_container.lastChild)
+          }
+          divs.forEach(function (div) {
+            _container.append(div)
+          })
+          self._pdfUpscaleSize = _pdfUpscaleSize
+          self.scale = 1
+          self._scaleDrawingForced()
+          self.scrollTop = scrollPosition
+        })
+      }
+    })
+  </script>
+</dom-module>

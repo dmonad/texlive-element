@@ -1,0 +1,21 @@
+{
+  "name": "texlive-element",
+  "description": "WebComponent for compiling latex using pdftex.js",
+  "main": "texlive-element.html",
+  "keywords": [
+    "web-components"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "polymer": "Polymer/polymer#^1.4.0",
+    "pdftex.js": "^0.0.10"
+  },
+  "devDependencies": {
+    "pdfjs-element": "^0.1.0",
+    "iron-component-page": "PolymerElements/iron-component-page#^1.0.0",
+    "iron-demo-helpers": "PolymerElements/iron-demo-helpers#^1.0.0",
+    "web-component-tester": "^4.0.0",
+    "webcomponentsjs": "webcomponents/webcomponentsjs#^0.7.0",
+    "ace-element": "^0.3.1"
+  }
+}

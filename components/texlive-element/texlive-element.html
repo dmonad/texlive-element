@@ -1,0 +1,142 @@
+<link rel="import" href="../polymer/polymer.html">
+<script src="../pdftex.js/pdftex.js"></script>
+
+<!--
+# &lt;texlive-element&gt;  <iframe src="https://ghbtns.com/github-btn.html?user=dmonad&repo=texlive-element&type=star&count=true" frameborder="0" scrolling="0" width="170px" height="20px"></iframe>
+> Polymer WebComponent for compiling latex in your browser using [pdftex.js](https://github.com/dmonad/pdftex.js)!
+
+@demo demo/index.html
+-->
+
+<dom-module id="texlive-element">
+  <template>
+    <style>
+      :host {
+        display: none;
+      }
+    </style>
+  </template>
+
+  <script>
+    Polymer({
+      is: 'texlive-element',
+      ready: function () {
+      },
+      properties: {
+        /**
+         * LaTeX source
+         */
+        source: {
+          type: String,
+          observer: '_observeSource'
+        },
+        /**
+         * Url to pdf file. This is actually a binary file encoded in a url
+         */
+        pdf: {
+          type: String,
+          notify: true
+        },
+        /**
+         * Dir to pdftex.js. Used to locate pdftex-worker. This is set global!
+         */
+        pdftexDir: {
+          type: String,
+          value: '/bower_components/pdftex.js/',
+          observer: '_observePdftexDir'
+        },
+        /**
+         * Texlive log output
+         */
+        log: {
+          type: String,
+          value: '',
+          notify: true
+        },
+        /**
+         * Whether this element is still processing a request
+         */
+        running: {
+          type: Boolean,
+          value: false,
+          notify: true
+        },
+        /**
+         * An error occurred and completed the compilation
+         */
+        error: {
+          type: Boolean,
+          value: false,
+          notify: true
+        },
+        /**
+         * Log to console
+         */
+        debug: {
+          type: Boolean,
+          value: false,
+          notify: true
+        }
+      },
+      _observePdftexDir: function () {
+        pdftex.setPdftexDir(this.pdftexDir)
+      },
+      _observeSource: function () {
+        if (!this.running && this.source !== '') {
+          var source = this.source
+          this.fire('start', source)
+          this.running = true
+          this.error = false
+          this.log = ''
+          var self = this
+          var processNext = function processNext () {
+            if (self.source !== source) {
+              self._observeSource
+            }
+          }
+          var compile = pdftex(source, { debug: self.debug })
+          compile.on('finish', function (event) {
+            self.running = false
+            if (event.success) {
+              self.pdf = event.url
+              self.fire('complete', event.url)
+            } else {
+              self.fire('error', event)
+            }
+            processNext()
+          })
+          var log = function (message) {
+            self.fire('log', message)
+            self.log += log + '\n'
+          }
+          compile.on('log', log)
+          compile.on('err', log)
+        }
+      }
+      /**
+       * Fired when compilation successfully terminated.
+       *
+       * @event complete
+       * @param {String} pdfUrl Url to pdf
+       */
+      /**
+       * Fired when pdftex logs a message (the complete log is available in the `log` property)
+       *
+       * @event log
+       * @param {String} pdfUrl The log message
+       */
+      /**
+       * Fired when compilation successfully terminated.
+       *
+       * @event error
+       * @param {String} message Error message
+       */
+      /**
+       * Fired when compilation started.
+       *
+       * @event start
+       * @param {String} source Compilation source
+       */
+    })
+  </script>
+</dom-module>

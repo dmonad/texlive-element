@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
+
+    <title>pdfjs-element demo</title>
+
+    <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+
+    <link rel="import" href="../../iron-demo-helpers/demo-pages-shared-styles.html">
+    <link rel="import" href="../../iron-demo-helpers/demo-snippet.html">
+    <link rel="import" href="../../paper-input/paper-input.html">
+    <link rel="import" href="../../paper-slider/paper-slider.html">
+    <link rel="import" href="../../paper-item/paper-item.html">
+    <link rel="import" href="../../paper-listbox/paper-listbox.html">
+    <link rel="import" href="../../paper-dropdown-menu/paper-dropdown-menu.html">
+
+    <link rel="import" href="../pdfjs-element.html">
+
+    <style is="custom-style" include="demo-pages-shared-styles">
+    </style>
+    <style>
+      .vertical-section-container {
+        max-width: 600px !important;
+      }
+      .demo {
+        padding: 0 !important;
+      }
+      .controls {
+        margin-left: auto;
+        margin-right: auto;
+        width: 90%;
+      }
+      .controls > * {
+        width: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <pdfjs-element pdfjs-worker-path="../../pdfjs-dist/build/pdf.worker.min.js"></pdfjs-element>
+    <div class="vertical-section-container centered">
+      <h3>Basic pdfjs-element demo</h3>
+      <demo-snippet>
+        <template>
+          <pdfjs-element src="./A-Midsummer-Night.pdf" page="1"></pdfjs-element>
+        </template>
+      </demo-snippet>
+    </div>
+    <div class="vertical-section-container centered">
+      <h3>Properties</h3>
+      <demo-snippet>
+        <template is="dom-bind">
+          <div class="controls">
+            <paper-dropdown-menu label="Select PDF file" value="{{file}}">
+              <paper-listbox class="dropdown-content">
+                <paper-item label="./A-Midsummer-Night.pdf">A Midsummer Night</paper-item>
+                <paper-item label="./As-You-Like-It.pdf">As You Like It</paper-item>
+                <paper-item label="./Hamlet.pdf">Hamlet</paper-item>
+                <paper-item label="./Macbeth.pdf">Macbeth</paper-item>
+              </paper-listbox>
+            </paper-dropdown-menu>
+            <p>Page Number:</p>
+            <paper-slider label="Page Number" pin immediate-value="{{pageNumber}}" min="1" max="{{numberOfPages}}"></paper-slider>
+            <paper-input label="Page range (E.g. '1', '1-2', or '3-4,6-7')" value="{{pageRange}}"></paper-input>
+          </div>
+          <pdfjs-element src="{{file}}" page-range="{{pageRange}}" page="{{pageNumber}}" number-of-pages="{{numberOfPages}}"></pdfjs-element>
+        </template>
+      </demo-snippet>
+    </div>
+    <div class="vertical-section-container centered">
+      <h3>Styling</h3>
+      <demo-snippet>
+        <template>
+          <style is="custom-style">
+            .styled {
+              background-color: #f5f5f5;
+              max-height: 600px;
+              --pdfjs-page: {
+                box-shadow: 0 7px 6px 0 rgba(0, 0, 0, 0.14), 0 5px 9px 5px rgba(0, 0, 0, 0.12), 0 7px 5px -5px rgba(0, 0, 0, 0.2);
+                margin: 10px;
+              };
+            }
+          </style>
+          <pdfjs-element src="./A-Midsummer-Night.pdf" class="styled" page-range="1-3"></pdfjs-element>
+        </template>
+      </demo-snippet>
+    </div>
+  </body>
+</html>
