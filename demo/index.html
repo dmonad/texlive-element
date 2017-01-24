@@ -52,7 +52,7 @@
   <texlive-element source="{{source}}" pdf="{{pdf}}" pdftex-dir="../../pdftex.js/"></texlive-element>
   <button onclick="compile()">Compile!</button>
   <pre id="logContainer"></pre>
-  <pdfjs-element src="{{pdf}}" log="{{log}}"></pdfjs-element>
+  <pdfjs-element src="{{pdf}}" log="{{log}}" pdfjs-worker-path="../../pdfjs-dist/build/pdf.worker.min.js"></pdfjs-element>
   <script>
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker
