@@ -23,6 +23,30 @@
       ready: function () {
       },
       properties: {
+        /** (Experimental)
+         *
+         * Refer to files using urls. For example:
+         * \includegraphic{http://y-js.org/images/yjs.png}
+         *
+         * Basically each occurence of '{url}' is replaced with a real path in
+         * the tex filesystem - which again refers to the url. Enjoy with care
+         */
+        enableUrls: {
+          type: Boolean,
+          value: false
+        },
+        /** (Experimental)
+         *
+         * CORS Proxy for url requests (see enable-urls).
+         * Instead of requesting an image http://y-js.org/images/yjs.png
+         * it requests ${proxy}/http://y-js.org/images/yjs.png
+         *
+         * The default proxy is really slow!
+         */
+        proxy: {
+          type: String,
+          value: 'https://proxyl2p-yayay.rhcloud.com/'
+        },
         /**
          * LaTeX source
          */
@@ -94,7 +118,11 @@
               self._observeSource
             }
           }
-          var compile = pdftex(source, { debug: self.debug })
+          var compile = pdftex(source, {
+            debug: self.debug,
+            enableUrls: this.enableUrls,
+            proxy: this.proxy
+          })
           compile.on('finish', function (event) {
             self.running = false
             if (event.success) {
